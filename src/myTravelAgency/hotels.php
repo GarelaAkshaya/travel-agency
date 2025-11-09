@@ -17,9 +17,10 @@ if (!isset($_SESSION['user_id'])) {
         <nav>
             <a href="index.php">Home</a>
             <a href="book.php">Book a Trip</a>
-            <a href="my_bookings.php">My Bookings</a>
+
             <a href="transport.php">Transport</a>
             <a href="hotels.php">Hotels</a>
+            <a href="my_bookings.php">My Bookings</a>
             <a href="logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a>
         </nav>
     </header>
@@ -74,7 +75,7 @@ if (!isset($_SESSION['user_id'])) {
         if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['hotel_id'])) {
             $hotel_id = $_POST['hotel_id'];
             $user_id = $_SESSION['user_id'];
-            $user_name = isset($_SESSION['name']) ? $_SESSION['name'] : 'Unknown';
+            $user_name = isset($_SESSION['username']) ? $_SESSION['username'] : 'Unknown';
             $user_email = isset($_SESSION['email']) ? $_SESSION['email'] : 'unknown@example.com';
 
             // Fetch hotel details for booking

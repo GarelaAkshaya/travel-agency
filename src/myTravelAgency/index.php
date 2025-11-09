@@ -12,9 +12,9 @@
         <nav>
             <a href="index.php">Home</a>
             <a href="book.php">Book a Trip</a>
-            <a href="my_bookings.php">My Bookings</a>
             <a href="transport.php">Transport</a>
             <a href="hotels.php">Hotels</a>
+            <a href="my_bookings.php">My Bookings</a>
             <?php if (isset($_SESSION['user_id'])): ?>
                 <a href="logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a>
             <?php else: ?>

@@ -3,6 +3,22 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+// Fetch user's username (as name) and email from the database
+$user_id = $_SESSION['user_id'];
+$sql_user = "SELECT username AS name, email FROM users WHERE id = ?";
+$stmt_user = $conn->prepare($sql_user);
+$stmt_user->bind_param("i", $user_id);
+$stmt_user->execute();
+$result_user = $stmt_user->get_result();
+if ($result_user->num_rows > 0) {
+    $user = $result_user->fetch_assoc();
+    $user_name = $user['name'];  // This is actually the username
+    $user_email = $user['email'];
+} else {
+    echo "<p>Error: User not found.</p>";
+    exit();
+}
+$stmt_user->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -17,14 +33,17 @@ if (!isset($_SESSION['user_id'])) {
         <nav>
             <a href="index.php">Home</a>
             <a href="book.php">Book a Trip</a>
-            <a href="my_bookings.php">My Bookings</a>
+
             <a href="transport.php">Transport</a>
              <a href="hotels.php">Hotels</a>
+             <a href="my_bookings.php">My Bookings</a>
             <a href="logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a>
         </nav>
     </header>
     <main>
         <h2>Search and Book Transport</h2>
+         <p>Booking as: <strong><?php echo $user_name; ?> (<?php echo $user_email; ?>)</strong></p>
+
         <form action="transport.php" method="post">
             <label for="from">From Destination:</label>
             <select id="from" name="from_id" required>
@@ -83,8 +102,6 @@ if (!isset($_SESSION['user_id'])) {
             }
             $stmt->close();
         }
-
-
 
     // Handle booking submission
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['transport_id'])) {

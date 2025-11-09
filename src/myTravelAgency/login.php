@@ -37,6 +37,7 @@
                 if (password_verify($password, $row['password'])) {
                     $_SESSION['user_id'] = $row['id'];
                     $_SESSION['username'] = $username;
+                    $_SESSION['email'] = $row['email'];
                     header("Location: index.php");
                     exit();
                 } else {
