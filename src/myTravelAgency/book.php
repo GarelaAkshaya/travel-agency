@@ -3,6 +3,23 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
 }
+
+// Fetch user's username (as name) and email from the database
+$user_id = $_SESSION['user_id'];
+$sql_user = "SELECT username AS name, email FROM users WHERE id = ?";
+$stmt_user = $conn->prepare($sql_user);
+$stmt_user->bind_param("i", $user_id);
+$stmt_user->execute();
+$result_user = $stmt_user->get_result();
+if ($result_user->num_rows > 0) {
+    $user = $result_user->fetch_assoc();
+    $user_name = $user['name'];  // This is actually the username
+    $user_email = $user['email'];
+} else {
+    echo "<p>Error: User not found.</p>";
+    exit();
+}
+$stmt_user->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,10 +35,13 @@ if (!isset($_SESSION['user_id'])) {
             <a href="index.php">Home</a>
             <a href="book.php">Book a Trip</a>
             <a href="my_bookings.php">My Bookings</a>
+            <a href="transport.php">Transport</a>
+            <a href="hotels.php">Hotels</a>
             <a href="logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a>
         </nav>
     </header>
     <main>
+        <p>Booking as: <strong><?php echo $user_name; ?> (<?php echo $user_email; ?>)</strong></p>
         <form action="book.php" method="post">
             <label for="destination">Destination:</label>
             <select id="destination" name="destination_id" required>
@@ -48,11 +68,10 @@ if (!isset($_SESSION['user_id'])) {
         if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $destination_id = mysqli_real_escape_string($conn, $_POST['destination_id']);
             $travel_date = mysqli_real_escape_string($conn, $_POST['travel_date']);
-            $user_id = $_SESSION['user_id'];
 
-            // Use prepared statement for security
-            $stmt = $conn->prepare("INSERT INTO bookings (user_id, destination_id, travel_date) VALUES (?, ?, ?)");
-            $stmt->bind_param("iis", $user_id, $destination_id, $travel_date);
+            // Insert with username as name and email from the logged-in user
+            $stmt = $conn->prepare("INSERT INTO bookings (user_id, name, email, destination_id, travel_date) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param("issis", $user_id, $user_name, $user_email, $destination_id, $travel_date);
 
             if ($stmt->execute()) {
                 echo "<p>Booking successful! Your trip is confirmed.</p>";

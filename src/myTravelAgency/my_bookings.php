@@ -18,6 +18,8 @@ if (!isset($_SESSION['user_id'])) {
             <a href="index.php">Home</a>
             <a href="book.php">Book a Trip</a>
             <a href="my_bookings.php">My Bookings</a>
+            <a href="transport.php">Transport</a>
+            <a href="hotels.php">Hotels</a>
             <a href="logout.php">Logout (<?php echo $_SESSION['username']; ?>)</a>
         </nav>
     </header>
@@ -59,7 +61,47 @@ if (!isset($_SESSION['user_id'])) {
 
         $stmt->close();
         ?>
+
+        <h3>Leave a Review for a Booking</h3>
+        <form action="my_bookings.php" method="post">
+            <label for="booking_id">Select Booking ID:</label>
+            <select id="booking_id" name="booking_id" required>
+                <?php
+                $sql = "SELECT id FROM bookings WHERE user_id = ?";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $user_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                while($row = $result->fetch_assoc()) {
+                    echo "<option value='" . $row["id"] . "'>" . $row["id"] . "</option>";
+                }
+                ?>
+            </select><br>
+            <label for="rating">Rating (1-5):</label>
+            <input type="number" id="rating" name="rating" min="1" max="5" required><br>
+            <label for="comment">Comment:</label>
+            <textarea id="comment" name="comment"></textarea><br>
+            <input type="submit" value="Submit Review">
+        </form>
+
+        <?php
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['rating'])) {
+            $booking_id = $_POST['booking_id'];
+            $rating = $_POST['rating'];
+            $comment = $_POST['comment'];
+
+            $stmt = $conn->prepare("INSERT INTO reviews (user_id, booking_id, rating, comment) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("iiis", $user_id, $booking_id, $rating, $comment);
+            if ($stmt->execute()) {
+                echo "<p>Review submitted!</p>";
+            } else {
+                echo "<p>Error: " . $stmt->error . "</p>";
+            }
+            $stmt->close();
+        }
+        ?>
     </main>
 </body>
 </html>
 <?php $conn->close(); ?>
+
